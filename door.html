@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Door Check-in · End Year Dinner 2026</title>
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#090909">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main class="page-center" style="align-items:start">
+    <div class="door">
+        <div class="eyebrow" style="text-align:center;font-size:12px">Ushers only</div>
+        <h1 class="gold">Door check-in</h1>
+
+        <!-- 1. Sign in with the door PIN (Settings tab of the sheet) -->
+        <form class="card" id="pin-form" style="margin-top:20px" novalidate>
+            <div class="field">
+                <label for="pin">Door PIN</label>
+                <input type="password" id="pin" inputmode="numeric" autocomplete="off" required>
+            </div>
+            <button class="btn btn-gold" type="submit" style="width:100%">Start checking in</button>
+            <div class="msg err hidden" id="pin-error" role="alert"></div>
+        </form>
+
+        <!-- 2. Scan tickets -->
+        <section class="hidden" id="scan">
+            <div class="stats" id="stats"></div>
+            <div id="reader"></div>
+            <div id="result" aria-live="assertive"></div>
+            <form class="manual" id="manual" novalidate>
+                <label for="manual-id" class="sr-only">Ticket ID</label>
+                <input type="text" id="manual-id" placeholder="Or type ticket ID" autocomplete="off" autocapitalize="characters">
+                <button class="btn btn-ghost" type="submit">Check</button>
+            </form>
+            <p style="text-align:center;margin-top:18px">
+                <button class="btn btn-ghost" type="button" id="sign-out" style="padding:8px 16px;font-size:13px">Sign out</button>
+            </p>
+        </section>
+    </div>
+</main>
+
+<script src="js/vendor/html5-qrcode.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script>
+(function () {
+    const { post, esc, store } = window.Dinner;
+    const $ = (s) => document.querySelector(s);
+    let pin = store.get('dinner-door-pin', '');
+    let scanner = null, busy = false, lastCode = '', lastAt = 0;
+
+    function stats(s) {
+        if (!s) return;
+        $('#stats').innerHTML = '<div><b>' + s.checkedIn + '</b>checked in</div><div><b>' + Math.max(0, s.confirmed - s.checkedIn) + '</b>still to come</div><div><b>' + s.confirmed + '</b>confirmed</div>';
+    }
+
+    async function signIn(p) {
+        const r = await post({ action: 'pin', pin: p });
+        if (!r.ok) throw new Error(r.error === 'busy' ? 'Too many wrong PINs. Wait 10 minutes.' : 'Wrong PIN.');
+        pin = p; store.set('dinner-door-pin', p);
+        $('#pin-form').classList.add('hidden');
+        $('#scan').classList.remove('hidden');
+        stats(r.stats);
+        startScanner();
+    }
+
+    $('#pin-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const err = $('#pin-error');
+        err.classList.add('hidden');
+        try { await signIn($('#pin').value.trim()); }
+        catch (x) { err.textContent = x.message === 'not-configured' ? 'The sheet link is not set in js/config.js yet.' : (/^(Wrong|Too)/.test(x.message) ? x.message : 'No connection. Try again.'); err.classList.remove('hidden'); }
+    });
+
+    $('#sign-out').addEventListener('click', () => {
+        store.set('dinner-door-pin', '');
+        location.reload();
+    });
+
+    function startScanner() {
+        if (!window.Html5Qrcode) { $('#reader').innerHTML = '<p class="empty">Camera scanner could not load. Type ticket IDs below.</p>'; return; }
+        scanner = new Html5Qrcode('reader');
+        scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: (w, h) => { const s = Math.floor(Math.min(w, h) * 0.7); return { width: s, height: s }; } }, onScan, () => {})
+            .catch(() => { $('#reader').innerHTML = '<p class="empty">Allow camera access to scan, or type ticket IDs below.</p>'; });
+    }
+
+    // A ticket QR holds the ticket page link (…ticket.html?t=TOKEN), or NRY:TOKEN when no link was set
+    function parse(text) {
+        text = String(text || '').trim();
+        const m = /[?&]t=([a-f0-9]{20,})/i.exec(text) || /^NRY:([a-f0-9]{20,})$/i.exec(text);
+        if (m) return { t: m[1] };
+        if (/^NRY-?[A-Z0-9]{5}$/i.test(text)) return { id: text };
+        return null;
+    }
+
+    function onScan(text) {
+        const now = Date.now();
+        if (busy || (text === lastCode && now - lastAt < 5000)) return;    // the same QR stays in view
+        lastCode = text; lastAt = now;
+        const q = parse(text);
+        if (!q) return show({ result: 'unknown' });
+        check(q);
+    }
+
+    $('#manual').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const v = $('#manual-id').value.trim();
+        if (v.replace(/[^A-Z0-9]/gi, '').length < 6) return;
+        check({ id: v });
+        $('#manual-id').value = '';
+    });
+
+    async function check(q) {
+        busy = true;
+        $('#result').innerHTML = '<div class="result" style="border-color:var(--line)"><span class="spinner"></span> Checking…</div>';
+        try {
+            const r = await post(Object.assign({ action: 'checkin', pin }, q));
+            if (r.error === 'pin') { store.set('dinner-door-pin', ''); alert('The door PIN was changed. Please sign in again.'); return location.reload(); }
+            if (!r.ok) return show({ result: 'error' });
+            show(r.found === false ? { result: 'notfound' } : r);
+            stats(r.stats);
+        } catch (x) {
+            show({ result: 'error' });
+        } finally {
+            busy = false;
+        }
+    }
+
+    function show(r) {
+        const t = r.ticket || {};
+        const views = {
+            admitted: ['admitted', '✅', 'Welcome!', 'Admit ' + t.tickets],
+            already: ['already', '⚠️', 'Already checked in', 'At ' + esc(t.checkedIn) + ' · admits ' + t.tickets],
+            invalid: ['invalid', '⛔', 'Not a valid ticket', 'Status: ' + esc(t.status || 'unknown') + '. Send them to the treasurer.'],
+            notfound: ['invalid', '⛔', 'Ticket not found', 'Check the ID or send them to the treasurer.'],
+            unknown: ['invalid', '❓', 'Not a dinner ticket', 'This QR code is not one of our tickets.'],
+            error: ['already', '📶', 'No connection', 'Try again, or type the ticket ID.']
+        };
+        const v = views[r.result] || views.error;
+        $('#result').innerHTML = '<div class="result ' + v[0] + '"><div class="icon">' + v[1] + '</div><div class="title">' + v[2] + '</div>' +
+            (t.name ? '<div class="name">' + esc(t.name) + '</div>' : '') +
+            (t.id ? '<div class="sub">' + esc(t.id) + (t.guests ? ' · with ' + esc(t.guests) : '') + '</div>' : '') +
+            '<div class="sub" style="margin-top:6px">' + v[3] + '</div></div>';
+        if (navigator.vibrate) navigator.vibrate(r.result === 'admitted' ? 80 : [60, 60, 60, 60, 60]);
+        beep(r.result === 'admitted');
+    }
+
+    function beep(good) {
+        try {
+            const ctx = beep.ctx || (beep.ctx = new (window.AudioContext || window.webkitAudioContext)());
+            const o = ctx.createOscillator(), g = ctx.createGain();
+            o.frequency.value = good ? 880 : 220;
+            g.gain.setValueAtTime(0.15, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (good ? 0.18 : 0.5));
+            o.connect(g).connect(ctx.destination);
+            o.start(); o.stop(ctx.currentTime + (good ? 0.2 : 0.5));
+        } catch (e) { /* no sound */ }
+    }
+
+    if (pin) signIn(pin).catch(() => { store.set('dinner-door-pin', ''); });
+})();
+</script>
+</body>
+</html>

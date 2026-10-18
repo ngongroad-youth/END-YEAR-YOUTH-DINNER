@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>End Year Dinner 2026 · Ngong Road SDA Youth</title>
+    <meta name="description" content="Ngong Road SDA Youth End Year Dinner, 6th December 2026 at Swiss Lenana. Good food, good company, fellowship. Get your ticket with M-Pesa and join the hype wall.">
+    <meta name="theme-color" content="#090909">
+    <meta property="og:title" content="End Year Dinner 2026 · Ngong Road SDA Youth">
+    <meta property="og:description" content="6th Dec 2026 · Swiss Lenana · KSH 2,500. Dress code: Elegance. Get your ticket and join the hype wall!">
+    <meta property="og:image" content="images/og.jpg">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Great+Vibes&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="nav">
+    <div class="wrap">
+        <a class="brand" href="#top"><span class="brand-mark">N</span><span>Ngong Road SDA Youth<small>End Year Dinner 2026</small></span></a>
+        <div class="nav-links">
+            <a href="#details">Details</a>
+            <a href="#wall">Hype wall</a>
+            <a href="#faq">FAQ</a>
+            <a class="btn-sm" href="#tickets">Get ticket</a>
+        </div>
+    </div>
+</nav>
+
+<header class="hero" id="top">
+    <div class="wrap">
+        <div class="hero-text">
+            <div class="host">Seventh Day Adventist Church · Ngong Road<span>Youth</span></div>
+            <div class="eyebrow" style="margin-top:22px">Presents</div>
+            <h1><span class="big gold">END YEAR</span><span class="script gold">Dinner</span></h1>
+            <p class="tagline">GOOD FOOD<b>|</b>GOOD COMPANY<b>|</b>FELLOWSHIP</p>
+            <div class="countdown" id="countdown" aria-live="polite">
+                <div><strong data-u="d">--</strong><span>Days</span></div>
+                <div><strong data-u="h">--</strong><span>Hours</span></div>
+                <div><strong data-u="m">--</strong><span>Mins</span></div>
+                <div><strong data-u="s">--</strong><span>Secs</span></div>
+            </div>
+            <div class="cta">
+                <a class="btn btn-gold" href="#tickets">🎟️ Get your ticket</a>
+                <a class="btn btn-ghost" href="#wall">✨ Join the hype wall</a>
+            </div>
+            <div class="guests-pill hidden" id="guests-pill"></div>
+        </div>
+        <img class="poster" src="images/poster.webp" width="1635" height="2000" alt="End Year Dinner poster: 6th Dec 2026 from 5pm, Swiss Lenana, KSH 2,500 per person, dress code Elegance">
+    </div>
+</header>
+
+<section class="details" id="details" aria-label="Event details">
+    <div class="wrap">
+        <div class="detail"><div class="k">Date</div><div class="v" data-f="dateShort">6th Dec 2026</div><div class="s" data-f="time">From 5PM</div></div>
+        <div class="detail"><div class="k">Ticket</div><div class="v" data-f="priceTxt">KSH 2,500</div><div class="s">Per person</div></div>
+        <div class="detail"><div class="k">Venue</div><div class="v" data-f="venue">Swiss Lenana</div><div class="s">Ngong Road, Nairobi</div></div>
+        <div class="detail"><div class="k">Dress code</div><div class="v" data-f="dressCode">Elegance</div><div class="s">Dress to impress</div></div>
+    </div>
+</section>
+
+<section class="section" id="tickets">
+    <div class="wrap">
+        <div class="section-head">
+            <div class="eyebrow">Tickets</div>
+            <h2 class="gold">Reserve your seat</h2>
+            <p>Pay with M-Pesa, enter your confirmation code below, and your ticket with a QR code arrives in your email as soon as the treasurer confirms.</p>
+        </div>
+
+        <div class="tickets-grid">
+            <div class="card">
+                <h3><span class="step-n">1</span>Send money</h3>
+                <div class="mpesa">
+                    <span class="mpesa-badge">LIPA NA M<b>-</b>PESA</span>
+                    <div class="label">SEND MONEY</div>
+                    <div class="num"><span data-f="mpesaNumber">+254 759 098947</span><button class="copy" type="button" id="copy-num">Copy</button></div>
+                    <div class="who">(<span data-f="mpesaName">Madeline</span>)</div>
+                    <ol>
+                        <li>M-Pesa → Send Money</li>
+                        <li>Enter the number above and the amount below</li>
+                        <li>Keep the confirmation SMS: you'll need its code</li>
+                    </ol>
+                </div>
+                <div class="field" style="margin-top:20px">
+                    <label for="qty">How many tickets?</label>
+                    <div class="stepper">
+                        <button type="button" data-step="-1" aria-label="One less">−</button>
+                        <input type="number" id="qty" value="1" min="1" max="10" inputmode="numeric" aria-label="Number of tickets">
+                        <button type="button" data-step="1" aria-label="One more">+</button>
+                    </div>
+                </div>
+                <div class="total"><span>Amount to send</span><strong id="total">KSH 2,500</strong></div>
+            </div>
+
+            <div class="card">
+                <h3><span class="step-n">2</span>Enter your details</h3>
+                <form id="buy-form" novalidate>
+                    <input type="checkbox" name="botcheck" class="hidden" tabindex="-1" autocomplete="off">
+                    <div class="field">
+                        <label for="name">Full name</label>
+                        <input type="text" id="name" name="name" autocomplete="name" required maxlength="80">
+                    </div>
+                    <div class="row2">
+                        <div class="field">
+                            <label for="email">Email <small>(your ticket goes here)</small></label>
+                            <input type="email" id="email" name="email" autocomplete="email" required maxlength="120">
+                        </div>
+                        <div class="field">
+                            <label for="phone">Phone</label>
+                            <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="07XX XXX XXX" required maxlength="30">
+                        </div>
+                    </div>
+                    <div class="field hidden" id="guests-field">
+                        <label for="guests">Names of the other guests <small>(optional)</small></label>
+                        <input type="text" id="guests" name="guests" maxlength="300" placeholder="e.g. Jane Wanjiru, Brian Otieno">
+                    </div>
+                    <div class="row2">
+                        <div class="field">
+                            <label for="code">M-Pesa code</label>
+                            <input type="text" class="code" id="code" name="code" required maxlength="12" placeholder="e.g. TKL4XYZ9AB" autocomplete="off" autocapitalize="characters" spellcheck="false">
+                            <small>The 10-character code at the start of your M-Pesa SMS</small>
+                        </div>
+                        <div class="field">
+                            <label for="amount">Amount sent (KSH)</label>
+                            <input type="number" id="amount" name="amount" inputmode="numeric" min="1" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="payer">Paid from <small>(optional, if a friend or parent paid)</small></label>
+                        <input type="text" id="payer" name="payer" maxlength="80" placeholder="Name on the M-Pesa line">
+                    </div>
+                    <button class="btn btn-gold" type="submit" style="width:100%" id="buy-btn">Submit payment</button>
+                    <div class="msg err hidden" id="buy-error" role="alert"></div>
+                    <div class="msg info hidden" id="buy-closed"></div>
+                </form>
+
+                <div class="done hidden" id="buy-done" aria-live="polite">
+                    <div class="tick">✓</div>
+                    <h3 style="justify-content:center">Payment received!</h3>
+                    <p>Your order number is</p>
+                    <div class="big-id" id="done-id">NRY-XXXXX</div>
+                    <p style="color:var(--muted)">Our treasurer will confirm your M-Pesa payment shortly. Your ticket with its QR code will then be emailed to <b id="done-email"></b>. Check your spam folder if you don't see it.</p>
+                    <div class="cta"><a class="btn btn-ghost" href="#wall">Say hi on the hype wall ✨</a><button class="btn btn-ghost" type="button" id="buy-again">Buy another</button></div>
+                </div>
+
+                <details class="check">
+                    <summary>Already paid? Check your ticket status</summary>
+                    <form id="status-form" novalidate style="margin-top:14px">
+                        <div class="row2">
+                            <div class="field"><label for="s-email">Email</label><input type="email" id="s-email" name="email" required></div>
+                            <div class="field"><label for="s-code">M-Pesa code</label><input type="text" class="code" id="s-code" name="code" required maxlength="12"></div>
+                        </div>
+                        <button class="btn btn-ghost" type="submit">Check status</button>
+                        <div class="msg hidden" id="status-msg" role="status"></div>
+                    </form>
+                </details>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section wall" id="wall">
+    <div class="wrap">
+        <div class="section-head">
+            <div class="eyebrow">Hype wall</div>
+            <h2 class="gold">The countdown is on</h2>
+            <p>Who's coming? What are you wearing? Who's on the dance floor first? Post, react, and get the excitement going.</p>
+        </div>
+
+        <form class="card composer" id="post-form" novalidate>
+            <input type="checkbox" name="botcheck" class="hidden" tabindex="-1" autocomplete="off">
+            <div class="chips" id="chips">
+                <button type="button" class="chip">Can't wait! 🔥</button>
+                <button type="button" class="chip">Outfit is ready 👗🤵</button>
+                <button type="button" class="chip">Ticket secured ✅</button>
+                <button type="button" class="chip">Who's coming with me? 🙋</button>
+                <button type="button" class="chip">Grateful for this year 🙏</button>
+            </div>
+            <div class="field">
+                <label for="post-text" class="sr-only">Your message</label>
+                <textarea id="post-text" name="text" maxlength="280" placeholder="Share the excitement… 🎉" required></textarea>
+            </div>
+            <div class="composer-foot">
+                <div style="flex:1;min-width:200px">
+                    <label for="post-name" class="sr-only">Your name</label>
+                    <input type="text" id="post-name" name="name" maxlength="40" placeholder="Your name (or leave blank)">
+                </div>
+                <span class="chars" id="chars">0/280</span>
+                <button class="btn btn-gold" type="submit" id="post-btn">Post</button>
+            </div>
+            <div class="msg hidden" id="post-msg" role="status"></div>
+        </form>
+
+        <div class="wall-tools">
+            <div class="tabs" role="group" aria-label="Sort posts">
+                <button type="button" data-sort="new" aria-pressed="true">Newest</button>
+                <button type="button" data-sort="top" aria-pressed="false">Top</button>
+            </div>
+            <span class="chars" id="wall-count"></span>
+        </div>
+        <div class="posts" id="posts" aria-live="polite"><div class="empty">Loading the hype…</div></div>
+    </div>
+</section>
+
+<section class="section" id="faq" style="padding-top:20px">
+    <div class="wrap">
+        <div class="section-head"><div class="eyebrow">Questions</div><h2 class="gold">Good to know</h2></div>
+        <div class="faq">
+            <details><summary>Can I pay for friends or family?</summary><p>Yes. Choose the number of tickets, send the total in one M-Pesa payment and add their names. One QR code admits your whole group, so come in together.</p></details>
+            <details><summary>How long until I get my ticket?</summary><p>As soon as the treasurer matches your M-Pesa code, usually within a day. Use "Check your ticket status" above any time.</p></details>
+            <details><summary>I didn't get the email</summary><p>Check your spam or promotions folder first. Still nothing? Reach us on WhatsApp and we'll resend it.</p></details>
+            <details><summary>What do I show at the entrance?</summary><p>The QR code in your ticket email, on your phone or printed (a PDF copy is attached). Ushers scan it and you're in.</p></details>
+            <details><summary>When is the RSVP deadline?</summary><p>Kindly RSVP by <span data-f="deadlineTxt">30th November</span>.</p></details>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="wrap">
+        <div class="eyebrow">RSVP &amp; Enquiries</div>
+        <div class="contacts">
+            <a class="btn btn-ghost" id="wa-link" href="https://wa.me/254705190443">💬 WhatsApp +254 705 190443</a>
+            <a class="btn btn-ghost" id="tel-link" href="tel:+254759098947">📞 Call +254 759 098947</a>
+        </div>
+        <div class="note">KINDLY RSVP BY <span data-f="deadlineCaps">30TH NOVEMBER</span></div>
+        <p style="color:var(--muted);font-size:13px;margin-top:24px">Seventh Day Adventist Church · Ngong Road Youth</p>
+    </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

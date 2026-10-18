@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Ticket · End Year Dinner 2026</title>
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#090909">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Great+Vibes&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main class="page-center">
+    <div style="width:min(420px,100%)">
+        <div class="ticket" id="ticket">
+            <div class="ticket-top">
+                <div class="eyebrow" style="font-size:12px">Ngong Road SDA Youth</div>
+                <div class="yr gold" style="margin-top:8px">END YEAR</div>
+                <div class="script gold">Dinner</div>
+                <div class="ticket-qr" id="qr"><span class="spinner" style="color:#999"></span></div>
+                <div class="ticket-id" id="t-id">&nbsp;</div>
+                <div class="ticket-admit" id="t-admit">&nbsp;</div>
+                <div style="margin-top:10px" id="t-badge"></div>
+            </div>
+            <div class="perf"></div>
+            <dl id="t-info">
+                <dt>Guest</dt><dd id="t-name">…</dd>
+                <dt>Date</dt><dd id="t-date">…</dd>
+                <dt>Venue</dt><dd id="t-venue">…</dd>
+                <dt>Dress code</dt><dd id="t-dress">…</dd>
+            </dl>
+        </div>
+        <div class="msg err hidden" id="t-error" role="alert"></div>
+
+        <!-- Only on an usher's phone (after signing in on door.html) -->
+        <div class="hidden" id="staff" style="margin-top:16px">
+            <button class="btn btn-gold" type="button" id="admit" style="width:100%">Admit guest</button>
+            <div id="staff-result"></div>
+        </div>
+
+        <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:18px">Show this QR code at the entrance. Tip: take a screenshot in case you have no network at the venue.</p>
+        <p style="text-align:center"><a href="./">← Back to the dinner page</a></p>
+    </div>
+</main>
+
+<script src="js/vendor/qrcode.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script>
+(function () {
+    const { get, post, prettyDate, esc, store } = window.Dinner;
+    const $ = (s) => document.querySelector(s);
+    const token = (new URLSearchParams(location.search).get('t') || '').replace(/[^a-f0-9]/gi, '');
+    const fail = (m) => { const e = $('#t-error'); e.textContent = m; e.classList.remove('hidden'); $('#qr').innerHTML = ''; };
+
+    if (token.length < 20) return fail('This ticket link is incomplete. Open the "View my ticket online" button in your ticket email again.');
+
+    // The same link the email's QR code holds, so either one scans the same
+    const link = location.origin + location.pathname + '?t=' + token;
+    try {
+        const qr = qrcode(0, 'M');
+        qr.addData(link);
+        qr.make();
+        $('#qr').innerHTML = qr.createSvgTag({ cellSize: 6, margin: 0, scalable: true });
+    } catch (e) { $('#qr').textContent = 'QR unavailable'; }
+
+    function badge(t) {
+        if (t.checkedIn) return '<span class="badge warn">CHECKED IN · ' + esc(t.checkedIn) + '</span>';
+        if (t.valid) return '<span class="badge ok">✓ VALID TICKET</span>';
+        return '<span class="badge bad">' + esc((t.status || 'Not valid').toUpperCase()) + '</span>';
+    }
+
+    get({ action: 'ticket', t: token }).then((t) => {
+        if (t.error === 'busy') return fail('The ticket desk is busy. Refresh in a minute.');
+        if (!t.found) return fail('We could not find this ticket. Please contact the organisers on WhatsApp +254 705 190443.');
+        $('#t-id').textContent = t.id;
+        $('#t-admit').textContent = 'ADMITS ' + t.tickets;
+        $('#t-badge').innerHTML = badge(t);
+        $('#t-name').innerHTML = esc(t.name) + (t.guests ? '<br><small style="color:var(--muted);font-weight:500">+ ' + esc(t.guests) + '</small>' : '');
+        $('#t-date').textContent = prettyDate(t.date);
+        $('#t-venue').textContent = t.venue;
+        $('#t-dress').textContent = t.dressCode;
+        document.title = t.id + ' · ' + t.name + ' · End Year Dinner';
+
+        const pin = store.get('dinner-door-pin', '');
+        if (pin && t.valid && !t.checkedIn) $('#staff').classList.remove('hidden');
+        $('#admit').addEventListener('click', async () => {
+            const b = $('#admit');
+            b.disabled = true; b.innerHTML = '<span class="spinner"></span> Admitting…';
+            try {
+                const r = await post({ action: 'checkin', t: token, pin });
+                if (r.error === 'pin') { $('#staff-result').innerHTML = '<div class="msg err">Door PIN changed. Sign in again on the door page.</div>'; return; }
+                if (r.result === 'admitted') { $('#staff-result').innerHTML = '<div class="result admitted"><div class="icon">✅</div><div class="title">Welcome!</div><div class="sub">Admit ' + r.ticket.tickets + '</div></div>'; b.classList.add('hidden'); }
+                else if (r.result === 'already') { $('#staff-result').innerHTML = '<div class="result already"><div class="icon">⚠️</div><div class="title">Already checked in</div><div class="sub">' + esc(r.ticket.checkedIn) + '</div></div>'; b.classList.add('hidden'); }
+                else $('#staff-result').innerHTML = '<div class="result invalid"><div class="icon">⛔</div><div class="title">Not valid</div></div>';
+                if (r.ticket) $('#t-badge').innerHTML = badge(Object.assign(r.ticket, r.result === 'admitted' ? { checkedIn: 'now' } : {}));
+            } catch (e) {
+                $('#staff-result').innerHTML = '<div class="msg err">No connection. Try again.</div>';
+            } finally {
+                b.disabled = false; b.textContent = 'Admit guest';
+            }
+        });
+    }).catch((e) => fail(e.message === 'not-configured' ? 'Tickets are not switched on yet.' : 'Could not load your ticket. Check your internet and refresh. Your QR code above still works at the door.'));
+})();
+</script>
+</body>
+</html>
