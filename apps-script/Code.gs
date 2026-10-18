@@ -159,32 +159,30 @@ function seats_(rows) {
 
 /* ---------------- web app ---------------- */
 
+// The website sends everything as GET requests (the most reliable way for a
+// browser to read Apps Script answers); doPost does the same for POSTs.
+const WRITES = { buy: buy_, status: status_, post: post_, react: react_, pin: pin_, checkin: checkin_ };
+
 function doGet(e) {
-  const q = (e && e.parameter) || {};
+  return handle_((e && e.parameter) || {});
+}
+
+function doPost(e) {
+  return handle_((e && e.parameter) || {});
+}
+
+function handle_(q) {
   try {
+    if (WRITES[q.action]) {
+      if (q.botcheck) return out_({ ok: true });              // bots fill the hidden box
+      return out_(WRITES[q.action](q));
+    }
     if (q.action === 'ticket') return out_(ticket_(q.t));
     if (q.action === 'wall') return out_({ posts: posts_() });
     return out_(info_());
   } catch (err) {
     console.error(err);
-    return out_({ ok: false, error: 'server' });
-  }
-}
-
-function doPost(e) {
-  const p = (e && e.parameter) || {};
-  if (p.botcheck) return out_({ ok: true });                  // bots fill the hidden box
-  try {
-    if (p.action === 'buy') return out_(buy_(p));
-    if (p.action === 'status') return out_(status_(p));
-    if (p.action === 'post') return out_(post_(p));
-    if (p.action === 'react') return out_(react_(p));
-    if (p.action === 'pin') return out_(pin_(p));
-    if (p.action === 'checkin') return out_(checkin_(p));
-    return out_({ ok: false, error: 'unknown' });
-  } catch (err) {
-    console.error(err);
-    return out_({ ok: false, error: 'server' });
+    return out_({ ok: false, error: 'server', detail: String(err).slice(0, 200) });
   }
 }
 

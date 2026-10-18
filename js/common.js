@@ -9,13 +9,8 @@
         return res.json();
     }
 
-    // A plain form POST (no custom headers) so the browser doesn't need a CORS pre-flight
-    async function post(params) {
-        if (!C.apiUrl) throw new Error('not-configured');
-        const res = await fetch(C.apiUrl, { method: 'POST', body: new URLSearchParams(params) });
-        if (!res.ok) throw new Error('http ' + res.status);
-        return res.json();
-    }
+    // Writes go as GET requests too: Apps Script answers GETs to browsers most reliably
+    const post = (params) => get(Object.assign({}, params, { _: Date.now() }));
 
     // "2026-12-06 17:00" in Nairobi time (UTC+3, no daylight saving)
     function eventDate(s) {
