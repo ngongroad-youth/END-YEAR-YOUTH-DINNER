@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Door Check-in · End Year Dinner 2026</title>
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#090909">
@@ -11,38 +11,107 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Everything fits on one phone screen: no page scrolling */
+        html, body { height: 100%; overflow: hidden; }
+        .app { height: 100vh; height: 100dvh; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
+        .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex: none; }
+        .top h1 { font-size: 24px; }
+        .top .sub { font-size: 11px; letter-spacing: .25em; color: var(--gold); text-transform: uppercase; }
+        .count { text-align: right; font-size: 12px; color: var(--muted); line-height: 1.2; }
+        .count b { font-size: 20px; color: var(--text); }
+        .icon-btn { background: var(--panel-2); border: 1px solid var(--line); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 15px; flex: none; }
+
+        .pin-card { margin: auto 0; padding: 22px; }
+        .pin-card input { font-size: 22px; letter-spacing: .4em; text-align: center; }
+
+        .seg { display: flex; background: var(--panel); border: 1px solid var(--line); border-radius: 30px; padding: 3px; flex: none; }
+        .seg button { flex: 1; border: 0; background: transparent; padding: 8px; border-radius: 30px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); }
+        .seg button[aria-pressed=true] { background: var(--goldtext); color: #111; }
+
+        .view { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+        .cam { position: relative; flex: 1; min-height: 0; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #000; }
+        #reader { position: absolute !important; inset: 0; height: 100% !important; border: 0 !important; border-radius: 0; min-height: 0; }
+        #reader video { width: 100% !important; height: 100% !important; object-fit: cover; }
+        .cam .hint { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: var(--muted); padding: 20px; font-size: 14px; }
+
+        /* Scan result sits over the bottom of the camera */
+        .res { position: absolute; left: 8px; right: 8px; bottom: 8px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 2px solid; background: rgba(12, 12, 12, .94); cursor: pointer; animation: pop .25s ease; }
+        .res .ic { font-size: 34px; line-height: 1; flex: none; }
+        .res .t { font-family: var(--serif); font-size: 22px; font-weight: 700; line-height: 1.1; }
+        .res .n { font-weight: 700; font-size: 15px; }
+        .res .s { color: var(--muted); font-size: 12px; }
+        .res.ok { border-color: var(--green-hi); } .res.ok .t { color: #7fe0a2; }
+        .res.warn { border-color: var(--amber); } .res.warn .t { color: #ffcf7a; }
+        .res.bad { border-color: var(--red); } .res.bad .t { color: #ff9c9c; }
+        .res.wait { border-color: var(--line); }
+
+        .manual { margin: 0; flex: none; }
+        .manual input { padding: 10px 12px; }
+        .manual .btn { padding: 10px 16px; }
+
+        .filters { display: flex; gap: 6px; flex: none; }
+        .filters button { flex: 1; border: 1px solid var(--line); background: var(--panel); border-radius: 20px; padding: 6px 4px; font-size: 12px; cursor: pointer; color: var(--muted); }
+        .filters button[aria-pressed=true] { border-color: var(--gold); color: var(--text); }
+        .list { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); -webkit-overflow-scrolling: touch; }
+        .g { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+        .g:last-child { border-bottom: 0; }
+        .g .who { flex: 1; min-width: 0; }
+        .g .nm { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .g .mt { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .g .admit { background: var(--goldtext); color: #111; border: 0; border-radius: 20px; padding: 7px 14px; font-weight: 700; font-size: 13px; cursor: pointer; flex: none; }
+        .g .in { color: #7fe0a2; font-size: 12px; font-weight: 700; text-align: right; flex: none; }
+        .g .unpaid { color: #ffcf7a; font-size: 12px; font-weight: 700; flex: none; }
+    </style>
 </head>
 <body>
-<main class="page-center" style="align-items:start">
-    <div class="door">
-        <div class="eyebrow" style="text-align:center;font-size:12px">Ushers only</div>
-        <h1 class="gold">Door check-in</h1>
+<main class="app">
+    <div class="top">
+        <div><div class="sub">Ushers only</div><h1 class="gold">Door check-in</h1></div>
+        <div style="display:flex;align-items:center;gap:10px">
+            <div class="count hidden" id="count"></div>
+            <button class="icon-btn hidden" type="button" id="sign-out" title="Sign out" aria-label="Sign out">⏻</button>
+        </div>
+    </div>
 
-        <!-- 1. Sign in with the door PIN (Settings tab of the sheet) -->
-        <form class="card" id="pin-form" style="margin-top:20px" novalidate>
-            <div class="field">
-                <label for="pin">Door PIN</label>
-                <input type="password" id="pin" inputmode="numeric" autocomplete="off" required>
-            </div>
-            <button class="btn btn-gold" type="submit" style="width:100%">Start checking in</button>
-            <div class="msg err hidden" id="pin-error" role="alert"></div>
-        </form>
+    <!-- 1. Sign in with the door PIN (Settings tab of the sheet) -->
+    <form class="card pin-card" id="pin-form" novalidate>
+        <div class="field">
+            <label for="pin">Door PIN</label>
+            <input type="password" id="pin" inputmode="numeric" autocomplete="off" required>
+        </div>
+        <button class="btn btn-gold" type="submit" style="width:100%">Start checking in</button>
+        <div class="msg err hidden" id="pin-error" role="alert"></div>
+    </form>
 
-        <!-- 2. Scan tickets -->
-        <section class="hidden" id="scan">
-            <div class="stats" id="stats"></div>
+    <!-- 2. Scan / guest list -->
+    <div class="seg hidden" id="seg" role="group" aria-label="View">
+        <button type="button" data-v="scan" aria-pressed="true">📷 Scan</button>
+        <button type="button" data-v="list" aria-pressed="false">📋 Guest list</button>
+    </div>
+
+    <section class="view hidden" id="v-scan">
+        <div class="cam">
+            <div class="hint" id="cam-hint">Starting camera…</div>
             <div id="reader"></div>
             <div id="result" aria-live="assertive"></div>
-            <form class="manual" id="manual" novalidate>
-                <label for="manual-id" class="sr-only">Ticket ID</label>
-                <input type="text" id="manual-id" placeholder="Or type ticket ID" autocomplete="off" autocapitalize="characters">
-                <button class="btn btn-ghost" type="submit">Check</button>
-            </form>
-            <p style="text-align:center;margin-top:18px">
-                <button class="btn btn-ghost" type="button" id="sign-out" style="padding:8px 16px;font-size:13px">Sign out</button>
-            </p>
-        </section>
-    </div>
+        </div>
+        <form class="manual" id="manual" novalidate>
+            <label for="manual-id" class="sr-only">Ticket ID</label>
+            <input type="text" id="manual-id" placeholder="Or type ticket ID" autocomplete="off" autocapitalize="characters">
+            <button class="btn btn-ghost" type="submit">Check</button>
+        </form>
+    </section>
+
+    <section class="view hidden" id="v-list">
+        <input type="text" id="search" placeholder="🔍 Search name, ticket ID or phone" autocomplete="off" style="flex:none">
+        <div class="filters" role="group" aria-label="Filter guests">
+            <button type="button" data-f="all" aria-pressed="true">All</button>
+            <button type="button" data-f="out" aria-pressed="false">Not arrived</button>
+            <button type="button" data-f="in" aria-pressed="false">Arrived</button>
+        </div>
+        <div class="list" id="list"><div class="empty">Loading guests…</div></div>
+    </section>
 </main>
 
 <script src="js/vendor/html5-qrcode.min.js"></script>
@@ -52,12 +121,16 @@
 (function () {
     const { post, esc, store } = window.Dinner;
     const $ = (s) => document.querySelector(s);
+    const $$ = (s) => Array.from(document.querySelectorAll(s));
     let pin = store.get('dinner-door-pin', '');
-    let scanner = null, busy = false, lastCode = '', lastAt = 0;
+    let scanner = null, scanning = false, busy = false, lastCode = '', lastAt = 0, hideTimer = 0;
+    let guests = [], filter = 'all', view = 'scan';
 
     function stats(s) {
         if (!s) return;
-        $('#stats').innerHTML = '<div><b>' + s.checkedIn + '</b>checked in</div><div><b>' + Math.max(0, s.confirmed - s.checkedIn) + '</b>still to come</div><div><b>' + s.confirmed + '</b>confirmed</div>';
+        const c = $('#count');
+        c.innerHTML = '<b>' + s.checkedIn + '</b> / ' + s.confirmed + '<br>checked in';
+        c.classList.remove('hidden');
     }
 
     async function signIn(p) {
@@ -65,9 +138,9 @@
         if (!r.ok) throw new Error(r.error === 'busy' ? 'Too many wrong PINs. Wait 10 minutes.' : 'Wrong PIN.');
         pin = p; store.set('dinner-door-pin', p);
         $('#pin-form').classList.add('hidden');
-        $('#scan').classList.remove('hidden');
+        ['#seg', '#sign-out'].forEach((s) => $(s).classList.remove('hidden'));
         stats(r.stats);
-        startScanner();
+        show('scan');
     }
 
     $('#pin-form').addEventListener('submit', async (e) => {
@@ -79,16 +152,31 @@
     });
 
     $('#sign-out').addEventListener('click', () => {
+        if (!confirm('Sign out of the door page?')) return;
         store.set('dinner-door-pin', '');
         location.reload();
     });
 
-    function startScanner() {
-        if (!window.Html5Qrcode) { $('#reader').innerHTML = '<p class="empty">Camera scanner could not load. Type ticket IDs below.</p>'; return; }
-        scanner = new Html5Qrcode('reader');
-        scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: (w, h) => { const s = Math.floor(Math.min(w, h) * 0.7); return { width: s, height: s }; } }, onScan, () => {})
-            .catch(() => { $('#reader').innerHTML = '<p class="empty">Allow camera access to scan, or type ticket IDs below.</p>'; });
+    /* ---------------- views ---------------- */
+    $$('#seg button').forEach((b) => b.addEventListener('click', () => show(b.dataset.v)));
+    function show(v) {
+        view = v;
+        $$('#seg button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === v));
+        $('#v-scan').classList.toggle('hidden', v !== 'scan');
+        $('#v-list').classList.toggle('hidden', v !== 'list');
+        if (v === 'scan') startScanner(); else { pauseScanner(); loadGuests(); }
     }
+
+    /* ---------------- scanner ---------------- */
+    function startScanner() {
+        if (scanner && scanning) { try { scanner.resume(); } catch (e) { /* already running */ } return; }
+        if (!window.Html5Qrcode) { $('#cam-hint').textContent = 'Camera scanner could not load. Type ticket IDs below.'; return; }
+        scanner = scanner || new Html5Qrcode('reader');
+        scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: (w, h) => { const s = Math.floor(Math.min(w, h) * 0.7); return { width: s, height: s }; } }, onScan, () => {})
+            .then(() => { scanning = true; $('#cam-hint').classList.add('hidden'); })
+            .catch(() => { $('#cam-hint').textContent = 'Allow camera access to scan, or type ticket IDs below.'; });
+    }
+    function pauseScanner() { if (scanner && scanning) { try { scanner.pause(true); } catch (e) { /* not running */ } } }
 
     // A ticket QR holds the ticket page link (…ticket.html?t=TOKEN), or NRY:TOKEN when no link was set
     function parse(text) {
@@ -104,7 +192,7 @@
         if (busy || (text === lastCode && now - lastAt < 5000)) return;    // the same QR stays in view
         lastCode = text; lastAt = now;
         const q = parse(text);
-        if (!q) return show({ result: 'unknown' });
+        if (!q) return result({ result: 'unknown' });
         check(q);
     }
 
@@ -114,42 +202,54 @@
         if (v.replace(/[^A-Z0-9]/gi, '').length < 6) return;
         check({ id: v });
         $('#manual-id').value = '';
+        $('#manual-id').blur();
     });
 
     async function check(q) {
         busy = true;
-        $('#result').innerHTML = '<div class="result" style="border-color:var(--line)"><span class="spinner"></span> Checking…</div>';
+        clearTimeout(hideTimer);
+        $('#result').innerHTML = '<div class="res wait"><span class="spinner"></span><div class="n">Checking…</div></div>';
         try {
             const r = await post(Object.assign({ action: 'checkin', pin }, q));
-            if (r.error === 'pin') { store.set('dinner-door-pin', ''); alert('The door PIN was changed. Please sign in again.'); return location.reload(); }
-            if (!r.ok) return show({ result: 'error' });
-            show(r.found === false ? { result: 'notfound' } : r);
+            if (r.error === 'pin') return pinChanged();
+            if (!r.ok) return result({ result: 'error' });
+            result(r.found === false ? { result: 'notfound' } : r);
             stats(r.stats);
+            if (r.result === 'admitted') markArrived(r.ticket.id, 'just now');
+            return r;
         } catch (x) {
-            show({ result: 'error' });
+            result({ result: 'error' });
         } finally {
             busy = false;
         }
     }
 
-    function show(r) {
+    function pinChanged() {
+        store.set('dinner-door-pin', '');
+        alert('The door PIN was changed. Please sign in again.');
+        location.reload();
+    }
+
+    function result(r) {
         const t = r.ticket || {};
         const views = {
-            admitted: ['admitted', '✅', 'Welcome!', 'Admit ' + t.tickets],
-            already: ['already', '⚠️', 'Already checked in', 'At ' + esc(t.checkedIn) + ' · admits ' + t.tickets],
-            invalid: ['invalid', '⛔', 'Not a valid ticket', 'Status: ' + esc(t.status || 'unknown') + '. Send them to the treasurer.'],
-            notfound: ['invalid', '⛔', 'Ticket not found', 'Check the ID or send them to the treasurer.'],
-            unknown: ['invalid', '❓', 'Not a dinner ticket', 'This QR code is not one of our tickets.'],
-            error: ['already', '📶', 'No connection', 'Try again, or type the ticket ID.']
+            admitted: ['ok', '✅', 'Welcome!', 'Admit ' + t.tickets],
+            already: ['warn', '⚠️', 'Already checked in', 'At ' + esc(t.checkedIn) + ' · admits ' + t.tickets],
+            invalid: ['bad', '⛔', 'Not a valid ticket', esc(t.status || 'Not confirmed') + ': send them to the treasurer'],
+            notfound: ['bad', '⛔', 'Ticket not found', 'Check the ID or send them to the treasurer'],
+            unknown: ['bad', '❓', 'Not a dinner ticket', 'This QR code is not one of our tickets'],
+            error: ['warn', '📶', 'No connection', 'Try again, or type the ticket ID']
         };
         const v = views[r.result] || views.error;
-        $('#result').innerHTML = '<div class="result ' + v[0] + '"><div class="icon">' + v[1] + '</div><div class="title">' + v[2] + '</div>' +
-            (t.name ? '<div class="name">' + esc(t.name) + '</div>' : '') +
-            (t.id ? '<div class="sub">' + esc(t.id) + (t.guests ? ' · with ' + esc(t.guests) : '') + '</div>' : '') +
-            '<div class="sub" style="margin-top:6px">' + v[3] + '</div></div>';
+        $('#result').innerHTML = '<div class="res ' + v[0] + '" title="Tap to close"><div class="ic">' + v[1] + '</div><div style="min-width:0">' +
+            '<div class="t">' + v[2] + '</div>' +
+            (t.name ? '<div class="n">' + esc(t.name) + (t.guests ? ' <span class="s">+ ' + esc(t.guests) + '</span>' : '') + '</div>' : '') +
+            '<div class="s">' + (t.id ? esc(t.id) + ' · ' : '') + v[3] + '</div></div></div>';
         if (navigator.vibrate) navigator.vibrate(r.result === 'admitted' ? 80 : [60, 60, 60, 60, 60]);
         beep(r.result === 'admitted');
+        hideTimer = setTimeout(() => { $('#result').innerHTML = ''; }, r.result === 'admitted' ? 6000 : 12000);
     }
+    $('#result').addEventListener('click', () => { clearTimeout(hideTimer); $('#result').innerHTML = ''; });
 
     function beep(good) {
         try {
@@ -162,6 +262,69 @@
             o.start(); o.stop(ctx.currentTime + (good ? 0.2 : 0.5));
         } catch (e) { /* no sound */ }
     }
+
+    /* ---------------- guest list ---------------- */
+    async function loadGuests() {
+        try {
+            const r = await post({ action: 'guests', pin });
+            if (r.error === 'pin') return pinChanged();
+            if (!r.guests) { $('#list').innerHTML = '<div class="empty">The guest list needs the latest sheet script. Paste the new Code.gs and deploy a new version.</div>'; return; }
+            guests = r.guests;
+            stats(r.stats);
+            renderGuests();
+        } catch (x) {
+            if (!guests.length) $('#list').innerHTML = '<div class="empty">No connection. Pull down or tap Guest list again.</div>';
+        }
+    }
+
+    const confirmed = (g) => g.status === 'Confirmed';
+    function renderGuests() {
+        const q = $('#search').value.trim().toLowerCase();
+        const counts = { all: guests.length, out: guests.filter((g) => confirmed(g) && !g.checkedIn).length, in: guests.filter((g) => g.checkedIn).length };
+        $$('.filters button').forEach((b) => { b.textContent = { all: 'All', out: 'Not arrived', in: 'Arrived' }[b.dataset.f] + ' (' + counts[b.dataset.f] + ')'; });
+        const shown = guests.filter((g) => {
+            if (filter === 'out' && (g.checkedIn || !confirmed(g))) return false;
+            if (filter === 'in' && !g.checkedIn) return false;
+            if (!q) return true;
+            return (g.name + ' ' + g.guests + ' ' + g.id + ' ' + g.phone).toLowerCase().includes(q);
+        });
+        if (!shown.length) { $('#list').innerHTML = '<div class="empty">' + (guests.length ? 'No one matches.' : 'No guests yet.') + '</div>'; return; }
+        $('#list').innerHTML = shown.map((g) =>
+            '<div class="g" data-id="' + esc(g.id) + '"><div class="who"><div class="nm">' + esc(g.name) + '</div>' +
+            '<div class="mt">' + esc(g.id) + ' · admits ' + g.tickets + (g.guests ? ' · + ' + esc(g.guests) : '') + '</div></div>' +
+            (g.checkedIn ? '<div class="in">✓ In<br><span style="font-weight:500;color:var(--muted)">' + esc(g.checkedIn) + '</span></div>'
+                : confirmed(g) ? '<button class="admit" type="button">Admit</button>'
+                : '<div class="unpaid">' + esc(g.status === 'Not received' ? 'Not paid' : 'Unconfirmed') + '</div>') +
+            '</div>').join('');
+    }
+
+    function markArrived(id, when) {
+        const g = guests.find((x) => x.id === id);
+        if (g && !g.checkedIn) { g.checkedIn = when; if (view === 'list') renderGuests(); }
+    }
+
+    $('#search').addEventListener('input', renderGuests);
+    $$('.filters button').forEach((b) => b.addEventListener('click', () => {
+        filter = b.dataset.f;
+        $$('.filters button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+        renderGuests();
+    }));
+    $('#list').addEventListener('click', async (e) => {
+        const btn = e.target.closest('.admit');
+        if (!btn) return;
+        const id = btn.closest('.g').dataset.id, g = guests.find((x) => x.id === id);
+        if (!confirm('Admit ' + g.name + ' (' + g.tickets + ' ' + (g.tickets > 1 ? 'people' : 'person') + ')?')) return;
+        btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+        try {
+            const r = await post({ action: 'checkin', pin, id });
+            if (r.error === 'pin') return pinChanged();
+            if (r.ticket && (r.result === 'admitted' || r.result === 'already')) { g.checkedIn = r.result === 'admitted' ? 'just now' : r.ticket.checkedIn; stats(r.stats); }
+            else alert('Could not admit: ' + (r.result || 'try again'));
+        } catch (x) {
+            alert('No connection. Try again.');
+        }
+        renderGuests();
+    });
 
     if (pin) signIn(pin).catch(() => { store.set('dinner-door-pin', ''); });
 })();

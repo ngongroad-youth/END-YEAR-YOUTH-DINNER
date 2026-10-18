@@ -161,7 +161,7 @@ function seats_(rows) {
 
 // The website sends everything as GET requests (the most reliable way for a
 // browser to read Apps Script answers); doPost does the same for POSTs.
-const WRITES = { buy: buy_, status: status_, post: post_, react: react_, pin: pin_, checkin: checkin_ };
+const WRITES = { buy: buy_, status: status_, post: post_, react: react_, pin: pin_, checkin: checkin_, guests: guests_ };
 
 function doGet(e) {
   return handle_((e && e.parameter) || {});
@@ -334,6 +334,26 @@ function pin_(p) {
   if (pinBlocked_()) return { ok: false, error: 'busy' };
   if (!pinOk_(p.pin)) return { ok: false, error: 'pin' };
   return { ok: true, stats: seats_(tickets_().getDataRange().getValues().slice(1)) };
+}
+
+// Guest list for the door page (PIN only): everyone with a ticket that isn't cancelled
+function guests_(p) {
+  if (pinBlocked_()) return { ok: false, error: 'busy' };
+  if (!pinOk_(p.pin)) return { ok: false, error: 'pin' };
+  const rows = tickets_().getDataRange().getValues().slice(1);
+  const list = rows
+    .filter((r) => r[T['Ticket ID']] && String(r[T['Status']]).trim() !== 'Cancelled')
+    .map((r) => ({
+      id: String(r[T['Ticket ID']]),
+      name: String(r[T['Name']]),
+      guests: String(r[T['Other guests']] || ''),
+      tickets: Number(r[T['Tickets']]) || 1,
+      phone: String(r[T['Phone']] || ''),
+      status: String(r[T['Status']] || 'To confirm').trim(),
+      checkedIn: r[T['Checked in']] ? when_(r[T['Checked in']]) : ''
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  return { ok: true, guests: list, stats: seats_(rows) };
 }
 
 // Find a ticket by its QR token or its printed ID (e.g. NRY-7KQ2M), then stamp "Checked in"
