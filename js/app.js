@@ -143,7 +143,7 @@
             $('#buy-done').scrollIntoView({ behavior: 'smooth', block: 'center' });
             if (!$('#post-name').value) $('#post-name').value = String(data.name).split(' ')[0];
         } catch (x) {
-            show(err, x.message === 'not-configured' ? 'Online ticket sales open soon.' : 'Could not reach the ticket desk. Check your internet and try again.');
+            show(err, x.message === 'not-configured' ? 'Online ticket sales open soon.' : 'Could not reach the ticket desk. Check your internet and try again. (' + x.message + ')');
         } finally {
             setBusy(btn, false);
         }
@@ -173,7 +173,7 @@
             else if (r.status === 'Cancelled') show(msg, r.id + ' was cancelled. Contact us on WhatsApp if this is unexpected.');
             else show(msg, '⏳ ' + r.id + ' is waiting for the treasurer to confirm the payment. Your ticket arrives by email once it is confirmed.', 'info');
         } catch (x) {
-            show(msg, 'Could not reach the ticket desk. Try again.');
+            show(msg, 'Could not reach the ticket desk. Try again. (' + x.message + ')');
         } finally {
             setBusy(btn, false);
         }
