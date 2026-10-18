@@ -3,7 +3,7 @@
    ========================================================================= */
 window.DINNER_CONFIG = {
     // Google Apps Script "Web app URL" (ends in /exec). Set-up: apps-script/Code.gs
-    apiUrl: '',
+    apiUrl: 'https://script.google.com/macros/s/AKfycbz87ad8y1d9nS6cHKJxk7XrhQ3mQiKvpse6KEnvFd8zoZ-cVTI3A6DEXDVl-3014nsD5g/exec',
 
     // Shown before the sheet answers (the sheet's Settings tab wins once it loads)
     event: 'End Year Dinner 2026',
